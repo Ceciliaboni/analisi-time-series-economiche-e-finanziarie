@@ -1,18 +1,27 @@
 # Analisi di Serie Temporali Economiche e Finanziarie
 
-Questo progetto contiene due analisi distinte:
+Questo progetto contiene un'analisi statistica completa di due serie storiche:
 
-1. **CPI USA (1985–2024)** – Modello ARIMA per l'indice dei prezzi al consumo.
-2. **Amazon (2016–2025)** – Modelli GARCH per la volatilità dei rendimenti del titolo AMZN.
+1. **Indice dei Prezzi al Consumo (USA, 1985–2024)** – Modello ARIMA
+2. **Prezzo Azionario Amazon (2016–2025)** – Modelli GARCH (s-GARCH, GJR-GARCH, T-GARCH, IGARCH)
 
-## Contenuto
-- Stima e diagnostica dei modelli (ARIMA, GARCH)
-- Previsioni ex-post e ex-ante
-- Test statistici di stazionarietà, normalità, eteroschedasticità
+## Linguaggio e strumenti usati
+- 📊 R (con librerie: `forecast`, `rugarch`, `quantmod`, `urca`, `FinTS`, ecc.)
+- 📄 Quarto Markdown (`.qmd`) per l'integrazione codice + testo
+- 📁 Report esportato in PDF/HTML
 
-## Librerie usate
-- `pandas`, `numpy`, `matplotlib`, `statsmodels`, `arch`, `yfinance`
+## File
+- `Programma.qmd` → codice e testo integrati
+- `Programma.html` → versione visualizzabile online
+- Cartella `R/` → funzioni esterne importate via `source()`
 
-## Come eseguire
-Clona il repository, installa le librerie e apri i notebook in JupyterLab o Google Colab.
+## Output principali
+- Stima modelli ARIMA e GARCH
+- Diagnostica dei residui
+- Previsioni ex-post ed ex-ante
+- Confronto modelli tramite test statistici
 
+## Autori
+Boni Cecilia & D’Agostino Federica — Università di Firenze, Corso di Laurea in Statistica
+
+📅 Febbraio 2025
