@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Boni Cecilia 7115032 &amp; D’Agostino Federica 7115999">
+<meta name="dcterms.date" content="2025-02-19">
+
+<title>Relazione di Statistica Economica</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Programma_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Programma_files/libs/quarto-html/quarto.js"></script>
+<script src="Programma_files/libs/quarto-html/popper.min.js"></script>
+<script src="Programma_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Programma_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Programma_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Programma_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Programma_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Programma_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Programma_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#indice-dei-prezzi-al-consumo-per-i-consumatori-urbani-u.s.a." id="toc-indice-dei-prezzi-al-consumo-per-i-consumatori-urbani-u.s.a." class="nav-link active" data-scroll-target="#indice-dei-prezzi-al-consumo-per-i-consumatori-urbani-u.s.a."><span class="header-section-number">1</span> Indice dei prezzi al consumo per i consumatori urbani (U.S.A.)</a>
+  <ul class="collapse">
+  <li><a href="#introduzione" id="toc-introduzione" class="nav-link" data-scroll-target="#introduzione"><span class="header-section-number">1.1</span> Introduzione</a></li>
+  <li><a href="#analisi-preliminare" id="toc-analisi-preliminare" class="nav-link" data-scroll-target="#analisi-preliminare"><span class="header-section-number">1.2</span> Analisi Preliminare</a></li>
+  <li><a href="#modellazione-arima" id="toc-modellazione-arima" class="nav-link" data-scroll-target="#modellazione-arima"><span class="header-section-number">1.3</span> Modellazione ARIMA</a>
+  <ul class="collapse">
+  <li><a href="#stima-del-modello" id="toc-stima-del-modello" class="nav-link" data-scroll-target="#stima-del-modello"><span class="header-section-number">1.3.1</span> Stima del modello:</a></li>
+  <li><a href="#diagnostica" id="toc-diagnostica" class="nav-link" data-scroll-target="#diagnostica"><span class="header-section-number">1.3.2</span> Diagnostica</a></li>
+  </ul></li>
+  <li><a href="#previsioni" id="toc-previsioni" class="nav-link" data-scroll-target="#previsioni"><span class="header-section-number">1.4</span> Previsioni</a>
+  <ul class="collapse">
+  <li><a href="#previsioni-ex-post" id="toc-previsioni-ex-post" class="nav-link" data-scroll-target="#previsioni-ex-post"><span class="header-section-number">1.4.1</span> Previsioni Ex-post</a></li>
+  <li><a href="#ex-ante" id="toc-ex-ante" class="nav-link" data-scroll-target="#ex-ante"><span class="header-section-number">1.4.2</span> Ex-ante</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#amazon-amzn" id="toc-amazon-amzn" class="nav-link" data-scroll-target="#amazon-amzn"><span class="header-section-number">2</span> Amazon (AMZN)</a>
+  <ul class="collapse">
+  <li><a href="#introduzione-1" id="toc-introduzione-1" class="nav-link" data-scroll-target="#introduzione-1"><span class="header-section-number">2.1</span> Introduzione</a></li>
+  <li><a href="#analisi-preliminare-1" id="toc-analisi-preliminare-1" class="nav-link" data-scroll-target="#analisi-preliminare-1"><span class="header-section-number">2.2</span> Analisi preliminare</a>
+  <ul class="collapse">
+  <li><a href="#analisi-dei-prezzi" id="toc-analisi-dei-prezzi" class="nav-link" data-scroll-target="#analisi-dei-prezzi"><span class="header-section-number">2.2.1</span> Analisi dei prezzi</a></li>
+  <li><a href="#analisi-dei-rendimenti" id="toc-analisi-dei-rendimenti" class="nav-link" data-scroll-target="#analisi-dei-rendimenti"><span class="header-section-number">2.2.2</span> Analisi dei rendimenti</a></li>
+  </ul></li>
+  <li><a href="#modellazione-archgarch" id="toc-modellazione-archgarch" class="nav-link" data-scroll-target="#modellazione-archgarch"><span class="header-section-number">2.3</span> Modellazione ARCH/GARCH</a>
+  <ul class="collapse">
+  <li><a href="#constant-simple-garch11" id="toc-constant-simple-garch11" class="nav-link" data-scroll-target="#constant-simple-garch11"><span class="header-section-number">2.3.1</span> Constant + simple-GARCH(1,1)</a></li>
+  <li><a href="#constant-gjr-garch11" id="toc-constant-gjr-garch11" class="nav-link" data-scroll-target="#constant-gjr-garch11"><span class="header-section-number">2.3.2</span> Constant + GJR-GARCH(1,1)</a></li>
+  <li><a href="#constant-t-garch11" id="toc-constant-t-garch11" class="nav-link" data-scroll-target="#constant-t-garch11"><span class="header-section-number">2.3.3</span> Constant + T-GARCH(1,1)</a></li>
+  <li><a href="#news-impact-curve-nic" id="toc-news-impact-curve-nic" class="nav-link" data-scroll-target="#news-impact-curve-nic"><span class="header-section-number">2.3.4</span> <strong>News Impact Curve (NIC)</strong></a></li>
+  <li><a href="#constant-igarch11" id="toc-constant-igarch11" class="nav-link" data-scroll-target="#constant-igarch11"><span class="header-section-number">2.3.5</span> Constant + IGARCH(1,1)</a></li>
+  </ul></li>
+  <li><a href="#previsioni-ex-post-1" id="toc-previsioni-ex-post-1" class="nav-link" data-scroll-target="#previsioni-ex-post-1"><span class="header-section-number">2.4</span> Previsioni Ex-Post</a>
+  <ul class="collapse">
+  <li><a href="#volatilità-di-garman-klass-vs-valori-stimati" id="toc-volatilità-di-garman-klass-vs-valori-stimati" class="nav-link" data-scroll-target="#volatilità-di-garman-klass-vs-valori-stimati"><span class="header-section-number">2.4.1</span> Volatilità di Garman-Klass vs valori stimati</a></li>
+  <li><a href="#diagnostica-di-mincer-zarnowitz" id="toc-diagnostica-di-mincer-zarnowitz" class="nav-link" data-scroll-target="#diagnostica-di-mincer-zarnowitz"><span class="header-section-number">2.4.2</span> Diagnostica di Mincer-Zarnowitz</a></li>
+  <li><a href="#misure-di-errore-di-previsione" id="toc-misure-di-errore-di-previsione" class="nav-link" data-scroll-target="#misure-di-errore-di-previsione"><span class="header-section-number">2.4.3</span> Misure di errore di previsione</a></li>
+  <li><a href="#test-di-diebold-mariano" id="toc-test-di-diebold-mariano" class="nav-link" data-scroll-target="#test-di-diebold-mariano"><span class="header-section-number">2.4.4</span> Test di Diebold-Mariano</a></li>
+  </ul></li>
+  <li><a href="#previsioni-ex-ante" id="toc-previsioni-ex-ante" class="nav-link" data-scroll-target="#previsioni-ex-ante"><span class="header-section-number">2.5</span> Previsioni Ex-Ante</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="Programma.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+  showspaces = false,
+  showtabs = false,
+  breaksymbolleft={},
+  breaklines
+  % Note: setting commandchars=\\\{\} here will cause an error
+}
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Relazione di Statistica Economica</h1>
+<p class="subtitle lead">Corso di laurea in Statistica a.a. 2024/2025</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Boni Cecilia 7115032 &amp; D’Agostino Federica 7115999 </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 19, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div style="page-break-after: always;"></div>
+<section id="indice-dei-prezzi-al-consumo-per-i-consumatori-urbani-u.s.a." class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Indice dei prezzi al consumo per i consumatori urbani (U.S.A.)</h1>
+<section id="introduzione" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="introduzione"><span class="header-section-number">1.1</span> Introduzione</h2>
+<p>L’<strong>Indice dei Prezzi al Consumo per Tutti i Consumatori Urbani</strong> (CPIAUCSL) misura le variazioni dei prezzi di un paniere di beni e servizi acquistati dai consumatori urbani negli USA. L’indice si basa sui prezzi di alimenti, abbigliamento, abitazioni, carburanti, tariffe di trasporto e tasse, raccolti mensilmente in 87 aree urbane. Viene utilizzato per identificare periodi di <strong>inflazione</strong> o <strong>deflazione</strong>, ma le sue oscillazioni possono essere influenzate dalla <strong>volatilità di beni</strong> come cibo e petrolio. I dati provengono dal Bureau of Labor Statistics (BLS) degli Stati Uniti. Sono 480 osservazioni raccolte il primo di ogni mese da Gennaio 1985 a Dicembre 2024 con valori normalizzati rispetto alla media dell’indice nel periodo 1982-1984.</p>
+</section>
+<section id="analisi-preliminare" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="analisi-preliminare"><span class="header-section-number">1.2</span> Analisi Preliminare</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>Grafico, ACF e PACF dati non differenziati</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>La time series del <strong>Consumer Price Index</strong> in figura 1 mostra una crescita nel lungo periodo. Sia l’ACF che la PACF, suggeriscono la presenza di almeno una radice unitaria.</p>
+<p>Eseguiamo <strong>test Augmented Dickey-Fuller</strong> seguendo la procedura di Fonzo-Lisi con<br>
+<span class="math inline">\(H_0:\gamma=0\)</span> e <span class="math inline">\(H_1:\gamma&lt;0\)</span>.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>     statistic  1pct  5pct 10pct
+tau3 -2.836008 -3.98 -3.42 -3.13
+phi2  6.714907  6.15  4.71  4.05
+phi3  4.189717  8.34  6.30  5.36</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>      statistic  1pct  5pct 10pct
+tau2 -0.9037386 -3.44 -2.87 -2.57
+phi1  6.2043340  6.47  4.61  3.79</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>     statistic  1pct  5pct 10pct
+tau1  3.286862 -2.58 -1.95 -1.62</code></pre>
+</div>
+</div>
+<p>La serie risulta comunque <strong>non-stazionaria</strong>, anche senza considerare la costante o il trend.</p>
+<p>La non-stazionarietà può essere dovuta a un <strong>trend</strong> o a una <strong>stagionalità</strong>, per trarre una conclusione si osserva il grafico della time series (in figura 1): si nota chiaramente una componente di <strong>trend crescente</strong> regolare e persistente nel tempo e al contrario <strong>non</strong> si osservano <strong>oscillazioni stagionali evidenti</strong>.</p>
+<p>Riteniamo più adatta la <strong>differenziazione</strong> di ordine 1 (<span class="math inline">\(d=1\)</span>)</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>     statistic  1pct  5pct 10pct
+tau2 -12.87516 -3.44 -2.87 -2.57
+phi1  82.88512  6.47  4.61  3.79</code></pre>
+</div>
+</div>
+<p>Dopo la differenziazione di ordine 1, la serie è diventata <strong>stazionaria</strong>, come si evince dalla figura 2.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>ACF e PACF dati differenziati</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="modellazione-arima" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="modellazione-arima"><span class="header-section-number">1.3</span> Modellazione ARIMA</h2>
+<section id="stima-del-modello" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="stima-del-modello"><span class="header-section-number">1.3.1</span> Stima del modello:</h3>
+<p>Il modello ARIMA selezionato è un <span class="math inline">\(ARIMA(1,1,2)\times(0,0,1)_{12} + Drift\)</span>, con criteri di informazione pari a AIC=-4457.96 e BIC=-4432.93. Non consideriamo gli effetti di calendario e non sono presenti outliers significativi.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>        ar1     ma1     ma2    sma1  drift
+     0.9532 -0.4326 -0.4056 -0.1504 0.0023
+s.e. 0.0307  0.0535  0.0456  0.0474 0.0003</code></pre>
+</div>
+</div>
+</section>
+<section id="diagnostica" class="level3" data-number="1.3.2">
+<h3 data-number="1.3.2" class="anchored" data-anchor-id="diagnostica"><span class="header-section-number">1.3.2</span> Diagnostica</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>Grafico, ACF e PACF dei residui</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>I residui oscillano attorno a zero e non mostrano evidenza di correlazione seriale.</p>
+<div style="page-break-after: always;"></div>
+<p><strong>LJUNG-BOX DEI RESIDUI</strong></p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]      [,2]      [,3]      [,4]      [,5]       [,6]     
+lag       1         2         5         10        15         20       
+statistic 0.3069732 0.3279316 3.578652  8.350151  26.82147   27.96251 
+parameter 1         2         5         10        15         20       
+p.value   0.5795435 0.8487711 0.6115215 0.5946757 0.03022504 0.1102899</code></pre>
+</div>
+</div>
+<p>Il Ljung-Box dei residui conferma la sostanziale assenza di correlazione seriale.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A seguito del test ARCH l’ipotesi nulla di omoschedasticità viene rifiutata; c’è quindi evidenza di <strong>eteroschedasticità</strong>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Distribuzione incondizionata dei residui standardizzati: istogramma e Q-Q plot.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Il Test di Shapiro-Wilk presenta un p-value significativo indicando che i residui <strong>non seguono una distribuzione normale</strong>.</p>
+</section>
+</section>
+<section id="previsioni" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="previsioni"><span class="header-section-number">1.4</span> Previsioni</h2>
+<section id="previsioni-ex-post" class="level3" data-number="1.4.1">
+<h3 data-number="1.4.1" class="anchored" data-anchor-id="previsioni-ex-post"><span class="header-section-number">1.4.1</span> Previsioni Ex-post</h3>
+<p>Controliamo con le previsioni ex-post la bontà predittiva del modello stimato.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>    model          ME       MAE      RMSE     ScMAE    ScRMSE
+em1 ARIMA -0.03261296 0.2681543 0.3840946 0.3461917 0.4400379
+emn Naive  0.74525000 0.7745833 0.8728671 1.0000000 1.0000000</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Previsioni ex-post</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>L’orizzonte <span class="math inline">\(h\)</span> è fissato a 1, l’origine <span class="math inline">\(t\)</span> è Gennaio 2024 e “scorre” per i successivi 12 mesi.</p>
+<p>Confrontando le misure di errore di previsione dei modelli ARIMA e NAIVE emerge che l’ARIMA presenta valori decisamente migliori.</p>
+</section>
+<section id="ex-ante" class="level3" data-number="1.4.2">
+<h3 data-number="1.4.2" class="anchored" data-anchor-id="ex-ante"><span class="header-section-number">1.4.2</span> Ex-ante</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Previsioni ex-ante</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>L’origine <span class="math inline">\(T\)</span> è Gennaio 2025 e l’orizzonte va da 1 a 12 mesi. La figura 6 mostra che con lo scorrere del tempo le previsioni effettutate dai due modelli sono sempre più distanti e le bande di pevisione si allargano.</p>
+<div style="page-break-after: always;"></div>
+</section>
+</section>
+</section>
+<section id="amazon-amzn" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Amazon (AMZN)</h1>
+<section id="introduzione-1" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="introduzione-1"><span class="header-section-number">2.1</span> Introduzione</h2>
+<p>Amazon <strong>AMZN</strong> è un’azienda multinazionale di commercio elettronico con sede principale a Seattle nello Stato di Washington. Dal punto di vista finanziario rappresenta uno dei benchmark del settore tecnologico e un punto di riferimento per investitori e analisti. L’obiettivo è modellare la dinamica di AMZN basandoci sui prezzi dal 2016-01-05 al 2025-01-16 al fine di prevederne la volatilità dal 2025-01-17 al 2025-01-26 .</p>
+</section>
+<section id="analisi-preliminare-1" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="analisi-preliminare-1"><span class="header-section-number">2.2</span> Analisi preliminare</h2>
+<section id="analisi-dei-prezzi" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="analisi-dei-prezzi"><span class="header-section-number">2.2.1</span> Analisi dei prezzi</h3>
+<p>La figura 7 riporta l’evoluzione del prezzo di chiusura aggiustato del titolo <strong>Amazon</strong> nel tempo, sia in scala lineare che logaritmica</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption>Time series plots dei prezzi e log-prezzi.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>La figura 7 mostra una crescita significativa dal 2016, con un aumento marcato fino al 2021, coincidente con il periodo della pandemia da Covid. Ciò è dovuto all’aumento di utenti che per necessità scelgono di comprare online. Il periodo successivo è caratterizzato da una fase di maggiore volatilità.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>ACF e PACF dei prezzi.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>La combinazione di <strong>ACF con decrescita lineare</strong> e <strong>PACF con un solo picco significativo</strong> (figura 8) è indicativa di una serie con radice unitaria.</p>
+</section>
+<section id="analisi-dei-rendimenti" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="analisi-dei-rendimenti"><span class="header-section-number">2.2.2</span> Analisi dei rendimenti</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption>Log-rendimenti e ACF dei log-rendimenti.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>I log-rendimenti in figura 9 oscillano attorno alla media (linea rossa), con una volatilità relativamente più elevata nel periodo successivo alla pandemia COVID-19.</p>
+<p>La maggior parte delle autocorrelazioni rimange entro la regione di accettazione segnalando <strong>scarsa correlazione seriale</strong>. Ciò è confermato anche dai risultati del Test di Pormanteau, con statistica test di <strong>Ljung Box</strong>.</p>
+<div style="page-break-after: always;"></div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]         [,2]         [,3]         [,4]       
+lag       4            8            12           16         
+statistic 88.41005     102.7838     121.5811     128.449    
+parameter 4            8            12           16         
+p.value   2.865424e-18 1.150518e-18 2.989506e-20 1.28339e-19</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          [,1]         [,2]         [,3]         [,4]        
+lag       4            8            12           16          
+statistic 74.85541     82.52427     98.44281     102.3308    
+parameter 4            8            12           16          
+p.value   2.137957e-15 1.515398e-14 1.123228e-15 1.264629e-14</code></pre>
+</div>
+</div>
+<p>I risultati dei test ARCH, sui rendimenti logaritmici e sui valori assoluti, mostrano p-values&lt;0.01, indicando <strong>eteroschedasticità</strong>. Questo comportamento è coerente con il “volatility clustering”, tipico delle serie finanziarie.</p>
+</section>
+</section>
+<section id="modellazione-archgarch" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="modellazione-archgarch"><span class="header-section-number">2.3</span> Modellazione ARCH/GARCH</h2>
+<section id="constant-simple-garch11" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="constant-simple-garch11"><span class="header-section-number">2.3.1</span> Constant + simple-GARCH(1,1)</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>        Estimate  Std. Error   t value     Pr(&gt;|t|)
+mu     0.1373556  0.02914773  4.712394 2.448231e-06
+omega  0.0857603  0.04168705  2.057241 3.966306e-02
+alpha1 0.1273834  0.04035060  3.156915 1.594476e-03
+beta1  0.8634437  0.04177647 20.668182 0.000000e+00
+shape  4.8263651  0.58777638  8.211227 2.220446e-16</code></pre>
+</div>
+</div>
+<p>Criteri: Akaike 3.987109, Bayes 4.001049</p>
+<p>Dal test di Nyblom emerge che l’ipotesi di stabilità dei parametri è rigettata.</p>
+<p>Il Sign test restituisce p-values maggiori di 0.05, indicando che il modello s-GARCH(1,1) <strong>non presenta effetti di asimmetria</strong> significativi nella risposta agli shock positivi o negativi.</p>
+<p>Poiché però il test è poco potente si prosegue con GJR-GARCH(1,1).</p>
+<div style="page-break-after: always;"></div>
+</section>
+<section id="constant-gjr-garch11" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="constant-gjr-garch11"><span class="header-section-number">2.3.2</span> Constant + GJR-GARCH(1,1)</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>         Estimate  Std. Error   t value     Pr(&gt;|t|)
+mu     0.11459173  0.03066290  3.737146 0.0001861208
+omega  0.08416941  0.04483980  1.877114 0.0605025050
+alpha1 0.05353355  0.04008774  1.335409 0.1817423727
+beta1  0.87628250  0.04663945 18.788440 0.0000000000
+gamma1 0.11476612  0.04847308  2.367626 0.0179026211
+shape  4.90022956  0.58598560  8.362372 0.0000000000</code></pre>
+</div>
+</div>
+<p>Criteri: Akaike 3.980546, Bayes 3.997273</p>
+<p>Il parametro <span class="math inline">\(\gamma_1\)</span> è significativo.</p>
+<p>La statistica congiunta del test di Nyblom suggerisce che l’ipotesi di stabilità dei parametri è rigettata.</p>
+<p>Il Sign test non è significativo.</p>
+</section>
+<section id="constant-t-garch11" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="constant-t-garch11"><span class="header-section-number">2.3.3</span> Constant + T-GARCH(1,1)</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>         Estimate  Std. Error   t value     Pr(&gt;|t|)
+mu     0.11105609  0.02633055  4.217765 2.467353e-05
+omega  0.04569295  0.01620221  2.820168 4.799854e-03
+alpha1 0.07458347  0.02433409  3.064979 2.176853e-03
+beta1  0.89017751  0.02268101 39.247707 0.000000e+00
+gamma1 0.08524658  0.02638920  3.230359 1.236347e-03
+shape  5.05787964  0.58647687  8.624176 0.000000e+00</code></pre>
+</div>
+</div>
+<p>Criteri: Akaike 3.968460, Bayes 3.985187</p>
+<p>La significatività del parametro <span class="math inline">\(\gamma_1\)</span> conferma che l’effetto leverage è rilevante nei dati analizzati.</p>
+<p>La statistica congiunta del test di Nyblom suggerisce che l’ipotesi di stabilità dei parametri è rigettata.</p>
+<p>Il Sign test non è significativo.</p>
+</section>
+<section id="news-impact-curve-nic" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="news-impact-curve-nic"><span class="header-section-number">2.3.4</span> <strong>News Impact Curve (NIC)</strong></h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Programma_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="768"></p>
+<figcaption>NIC s-GARCH, GJR-GARCH e T-GARCH</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>La NIC per il s-GARCH è <strong>simmetrica</strong> rispetto a <span class="math inline">\(u_{t-1}=0\)</span>.</p>
+<p>La NIC per il GJR-GARCH è <strong>asimmetrica</strong>, con una pendenza più accentuata per <span class="math inline">\(u_{t-1}&lt;0\)</span>. Gli shock negativi hanno un impatto maggiore sulla volatilità rispetto a quelli positivi.</p>
+<p>Anche il modello T-GARCH mostra <strong>asimmetria</strong>, ma in modo meno accentuato.</p>
+</section>
+<section id="constant-igarch11" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="constant-igarch11"><span class="header-section-number">2.3.5</span> Constant + IGARCH(1,1)</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>         Estimate  Std. Error  t value     Pr(&gt;|t|)
+mu     0.13736859  0.03148742 4.362649 1.284968e-05
+omega  0.07674571  0.03740801 2.051585 4.021005e-02
+alpha1 0.13586049  0.03767514 3.606105 3.108278e-04
+beta1  0.86413951          NA       NA           NA
+shape  4.61778021  0.47692818 9.682339 0.000000e+00</code></pre>
+</div>
+</div>
+<p>Criteri: Akaike 3.986430, Bayes 3.99758</p>
+</section>
+</section>
+<section id="previsioni-ex-post-1" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="previsioni-ex-post-1"><span class="header-section-number">2.4</span> Previsioni Ex-Post</h2>
+<p>Si procede confrontando le stime della volatilità generate dal modello con la volatilità di Garman-Klass (<strong>benchmark esterno</strong>, misura di volatilità ricavabile dai dati giornalieri).</p>
+<section id="volatilità-di-garman-klass-vs-valori-stimati" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="volatilità-di-garman-klass-vs-valori-stimati"><span class="header-section-number">2.4.1</span> Volatilità di Garman-Klass vs valori stimati</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-GKvsFit" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-GKvsFit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Programma_files/figure-html/fig-GKvsFit-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-GKvsFit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Volatilità di Garman-Klass vs valori stimati.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In figura 11 le stime di tutti i modelli seguono bene il profilo della volatilità di Garman-Klass.</p>
+</section>
+<section id="diagnostica-di-mincer-zarnowitz" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="diagnostica-di-mincer-zarnowitz"><span class="header-section-number">2.4.2</span> Diagnostica di Mincer-Zarnowitz</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>     model        name   estimate  HAC.s.e.  HAC.stat  HAC.pvalue
+   s-GARCH (Intercept)  1.0719982 0.3935839  2.723684 0.006893260
+   s-GARCH         fit -0.6214055 0.2444963 -2.541575 0.011616839
+   s-GARCH       Ftest         NA        NA  4.517986 0.011781195
+ GJR-GARCH (Intercept)  0.9342404 0.3757022  2.486651 0.013523290
+ GJR-GARCH         fit -0.5395621 0.2370685 -2.275976 0.023661143
+ GJR-GARCH       Ftest         NA        NA  4.334100 0.014074098
+   T-GARCH (Intercept)  0.6480233 0.4586910  1.412767 0.158920257
+   T-GARCH         fit -0.3793903 0.2832050 -1.339631 0.181535022
+   T-GARCH       Ftest         NA        NA  1.231822 0.293457584
+   I-GARCH (Intercept)  1.0942564 0.3802081  2.878046 0.004333949
+   I-GARCH         fit -0.6403365 0.2328201 -2.750348 0.006371288
+   I-GARCH       Ftest         NA        NA  4.453187 0.012542745</code></pre>
+</div>
+</div>
+<p>Non si rifiutano le ipotesi nulle sui parametri <span class="math inline">\(H_0:\beta_0=0\)</span> e <span class="math inline">\(H_0:\beta_1=0\)</span> solo per il T-GARCH. Anche la statistica F relativa al test congiunto <span class="math inline">\(H_0:\beta_0=\beta_1=0\)</span> risulta significativa per s-GARCH, GJR-GARCH e I-GARCH, ma non per T-GARCH. Quest’ultimo tende quindi a fornire previsioni non distorte.</p>
+</section>
+<section id="misure-di-errore-di-previsione" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="misure-di-errore-di-previsione"><span class="header-section-number">2.4.3</span> Misure di errore di previsione</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>    measure     model          ME       MAE      RMSE        MPE      MAPE
+ Volatility   s-GARCH -0.04944622 0.5964320 0.8368379 -0.1731566 0.3760265
+ Volatility GJR-GARCH -0.02784897 0.5733793 0.8154102 -0.1546487 0.3573898
+ Volatility   T-GARCH -0.02884134 0.5468691 0.7828399 -0.1564186 0.3447967
+ Volatility   I-GARCH -0.08255037 0.6096676 0.8477173 -0.1944118 0.3886943
+ Volatility     naive -0.33035572 0.6601478 0.8689173 -0.3684533 0.4585651
+     RMSPE       MLLE     ScMAE    ScRMSE
+ 0.5426233 0.08430801 0.9034825 0.9630812
+ 0.5219240 0.07964752 0.8685620 0.9384210
+ 0.4856094 0.07494494 0.8284040 0.9009372
+ 0.5635627 0.08552012 0.9235320 0.9756019
+ 0.6178176 0.08973608 1.0000000 1.0000000</code></pre>
+</div>
+</div>
+<p>Il T-GARCH risulta essere il modello migliore in termini di precisione previsionale sulla volatilità, presentando i valori più bassi per ogni misura di errore.</p>
+</section>
+<section id="test-di-diebold-mariano" class="level3" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="test-di-diebold-mariano"><span class="header-section-number">2.4.4</span> Test di Diebold-Mariano</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>    measure               model horizon loss   statistic      p_value
+ Volatility   T-GARCH - s-GARCH       1   SE -3.44552310 5.699552e-04
+ Volatility   T-GARCH - s-GARCH       1   AE -4.23002805 2.336622e-05
+ Volatility   T-GARCH - s-GARCH       1  LLE -3.81793651 1.345725e-04
+ Volatility T-GARCH - GJR-GARCH       1   SE -1.59307175 1.111441e-01
+ Volatility T-GARCH - GJR-GARCH       1   AE -2.41163421 1.588121e-02
+ Volatility T-GARCH - GJR-GARCH       1  LLE -2.19780914 2.796271e-02
+ Volatility   T-GARCH - I-GARCH       1   SE -3.66272229 2.495490e-04
+ Volatility   T-GARCH - I-GARCH       1   AE -4.93610925 7.969648e-07
+ Volatility   T-GARCH - I-GARCH       1  LLE -4.21500792 2.497694e-05
+   Variance   T-GARCH - s-GARCH       1   SE -1.05091778 2.932964e-01
+   Variance   T-GARCH - s-GARCH       1   AE -4.35067330 1.357201e-05
+   Variance   T-GARCH - s-GARCH       1  LLE -3.24149318 1.189053e-03
+   Variance T-GARCH - GJR-GARCH       1   SE -0.09998692 9.203547e-01
+   Variance T-GARCH - GJR-GARCH       1   AE -2.49217191 1.269646e-02
+   Variance T-GARCH - GJR-GARCH       1  LLE -1.99982421 4.551925e-02
+   Variance   T-GARCH - I-GARCH       1   SE -0.95667808 3.387298e-01
+   Variance   T-GARCH - I-GARCH       1   AE -4.96988508 6.699259e-07
+   Variance   T-GARCH - I-GARCH       1  LLE -3.40564199 6.600868e-04</code></pre>
+</div>
+</div>
+<p>Il test risulta sempre significativo, indicando che il modello T-GARCH produce previsioni significativamente migliori di tutti gli altri modelli considerati.</p>
+<p>Per minimizzare gli errori nella previsione della volatilità o della varianza, T-GARCH è la scelta più robusta tra i modelli considerati.</p>
+</section>
+</section>
+<section id="previsioni-ex-ante" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="previsioni-ex-ante"><span class="header-section-number">2.5</span> Previsioni Ex-Ante</h2>
+<p>Usiamo il modello T-GARCH per le previsioni ex-ante, con origine <span class="math inline">\(T\)</span> il 17/01/25 e con orizzonte della previsione da 1 a 10 (dal 17/01/25 al 26/01/25).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ForecastPlot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ForecastPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Programma_files/figure-html/fig-ForecastPlot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ForecastPlot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Previsioni ex-ante T-GARCH.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Il modello prevede una media che si avvicina a 0, coerente con l’ipotesi che i rendimenti siano stazionari attorno alla media.</p>
+<p>Le bande di confidenza catturano una certa variabilità nei futuri rendimenti.</p>
+<p>Per quanto riguarda le previsioni per la volatilità il modello T-GARCH prevede che all’aumentare di <span class="math inline">\(h\)</span> si avvicini all’unconditional volatility.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

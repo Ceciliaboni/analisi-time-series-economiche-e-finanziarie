@@ -1,0 +1,1250 @@
+---
+title: "Relazione di Statistica Economica"
+subtitle: "Corso di laurea in Statistica a.a. 2024/2025"
+author: "Boni Cecilia 7115032 & D'Agostino Federica 7115999"
+date: 2025-02-19
+format: pdf
+editor: source
+toc: true #abilita/disabilita il sommario
+number-sections: true #Abilita la numerazione automatica delle sezioni
+editor_options: 
+  chunk_output_type: console #output dei chunk di codice verrà visualizzato nel formato console
+---
+
+---
+format: 
+  pdf:
+    keep-tex: true
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+include-before-body:
+  text: |
+    \RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+      showspaces = false,
+      showtabs = false,
+      breaksymbolleft={},
+      breaklines
+      % Note: setting commandchars=\\\{\} here will cause an error 
+    }
+---
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+
+## Preliminary operations
+
+#### Clean memory
+rm(list = ls())
+
+#### Libraries
+library(tseries)  
+library(sandwich)
+library(lmtest)
+library(urca)     ## For unit root
+library(rugarch)  ## For GARCH models
+library(FinTS)    ## For ArchTest (download from RForge)
+library(car)
+library(forecast) 
+library(xts)      ## For time stamps
+library(quantmod) ## For downloading data
+library(tsoutliers)   ## For outliers
+library(FinTS)        ## For ArchTest (from RForge)
+
+#### Functions
+source("C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/R/TSA-Predict-Student-Functions.R")
+source("C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/R/TSA-Finance-Functions.R")
+source("C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/R/TSA-Useful-Functions.R")
+source("C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/R/CalendarEffects-Student-Functions.R")
+
+
+.MincerZarnowitz.local <- function(y, fit)
+{
+  #### Make the test
+  x1 <- .MincerZarnowitz(y = y, fit = fit)
+  x2 <- data.frame(
+    NA, 
+    NA, x1$x$F[2], x1$x$`Pr(>F)`[2], 
+    NA, x1$xHC$F[2], x1$xHC$`Pr(>F)`[2], 
+    NA, x1$xHAC$F[2], x1$xHAC$`Pr(>F)`[2])
+  colnames(x2) <- colnames(x1$coef)
+  coef <- rbind(x1$coef, Ftest = x2)
+  ind <- c("estimate", "HAC.s.e.", "HAC.tstat", "HAC.pvalue")
+  coef <- coef[, ind, drop = FALSE]
+  colnames(coef) <- c("estimate", "HAC.s.e.", "HAC.stat", "HAC.pvalue")
+  data.frame(name = rownames(coef), coef, check.names = FALSE, 
+    fix.empty.names = FALSE)
+}
+
+.DieboldMariano.local <- function(y, f1, f2, h, loss)
+{
+  #### Make the test
+  x1 <- .DieboldMariano(y = y, f1 = f1, f2 = f2, h = h, loss = loss)
+  data.frame(
+    horizon = as.numeric(x1$parameter["Forecast horizon"]),
+    loss = loss,
+    statistic = as.numeric(x1$statistic))
+}
+```
+
+\newpage
+
+# Indice dei prezzi al consumo per i consumatori urbani (U.S.A.)
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#### Settings
+file.data <- "C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/PROGETTO/CPIAUCSL.csv"
+name <- "Indice dei prezzi al consumo"
+unit <- "Index"
+
+#### Read data
+data <- read.table(file = file.data, header = TRUE, sep = ",", 
+  na.strings = "NA")
+head(data, 3)
+tail(data, 3)
+dim(data)
+
+data$observation_date <- as.Date(x = as.character(data$observation_date), format = "%Y-%m-%d")
+ind<-data$observation_date>=as.Date("1985-01-01")
+data<-data[ind,]
+dim(data)
+
+date<-data$observation_date
+y <- data$CPIAUCSL
+
+#### ts() object
+start <- as.numeric( c( format(date[1], "%Y"), format(date[1], "%m") ) )
+yor <- ts( data = y, start = start, frequency = 12)
+g.transf <- "log"        ## Name of the transformation (use "id" for none) 
+y <- ts( data = log(y), start = start, frequency = 12)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+drift <- cbind(drift = 1 : NROW(y))
+```
+
+## Introduzione
+
+L'**Indice dei Prezzi al Consumo per Tutti i Consumatori Urbani** (CPIAUCSL) misura le variazioni dei prezzi di un paniere di beni e servizi acquistati dai consumatori urbani negli USA. L'indice si basa sui prezzi di alimenti, abbigliamento, abitazioni, carburanti, tariffe di trasporto e tasse, raccolti mensilmente in 87 aree urbane. Viene utilizzato per identificare periodi di **inflazione** o **deflazione**, ma le sue oscillazioni possono essere influenzate dalla **volatilità di beni** come cibo e petrolio. I dati provengono dal Bureau of Labor Statistics (BLS) degli Stati Uniti. Sono 480 osservazioni raccolte il primo di ogni mese da Gennaio 1985 a Dicembre 2024 con valori normalizzati rispetto alla media dell'indice nel periodo 1982-1984.
+
+## Analisi Preliminare
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-width: 12
+#| fig-height: 4
+
+par(mar = c(2.5,2.5,2.5,1))
+
+x <- yor
+plot(x = date, y = x, type = "l", main = name, ylab="")
+#Acf(x = x, type = "correlation", na.action = na.pass, lag.max = 60, main = name)
+#Acf(x = x, type = "partial",     na.action = na.pass, lag.max = 60, main = name)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Grafico, ACF e PACF dati non differenziati"
+#| fig-width: 12
+#| fig-height: 4
+
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+
+#plot(x = date, y = x, type = "l", main = name, ylab="")
+Acf(x = x, type = "correlation", na.action = na.pass, lag.max = 60, main = name)
+Acf(x = x, type = "partial",     na.action = na.pass, lag.max = 60, main = name)
+```
+
+La time series del **Consumer Price Index** in figura 1 mostra una crescita nel lungo periodo. Sia l'ACF che la PACF, suggeriscono la presenza di almeno una radice unitaria.
+
+Eseguiamo **test Augmented Dickey-Fuller** seguendo la procedura di Fonzo-Lisi con\
+$H_0:\gamma=0$ e $H_1:\gamma<0$.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+# Test Augmented Dickey-Fuller (DF) con termine di trend
+##   DGP:   RW + drift; 
+##   Model: AR(1) + trend (+ other possible stationary terms)
+adf.1 <- ur.df(y = y, type = "trend", lags = 24, selectlags = "AIC")
+data.frame(t(adf.1@teststat), adf.1@cval, check.names = FALSE)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+##   (DGP:   RW; 
+##    Model: AR(1) + constant (+ other possible stationary terms))
+adf.2 <- ur.df(y = y, type = "drift", lags = 24, selectlags = "AIC")
+data.frame(t(adf.2@teststat), adf.2@cval, check.names = FALSE)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+##   (DGP:   RW; 
+##    Model: AR(1) (+ other possible stationary terms))
+adf.3 <- ur.df(y = y, type = "none", lags = 24, selectlags = "AIC")
+data.frame(t(adf.3@teststat), adf.3@cval, check.names = FALSE)
+```
+
+La serie risulta comunque **non-stazionaria**, anche senza considerare la costante o il trend.
+
+La non-stazionarietà può essere dovuta a un **trend** o a una **stagionalità**, per trarre una conclusione si osserva il grafico della time series (in figura 1): si nota chiaramente una componente di **trend crescente** regolare e persistente nel tempo e al contrario **non** si osservano **oscillazioni stagionali evidenti**.
+
+Riteniamo più adatta la **differenziazione** di ordine 1 ($d=1$)
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+diff_y <- diff(y)
+adf_test <- ur.df(diff_y, type = "drift", selectlags = "AIC")  # Test ADF
+data.frame(t(adf_test@teststat), adf_test@cval, check.names = FALSE)
+```
+
+Dopo la differenziazione di ordine 1, la serie è diventata **stazionaria**, come si evince dalla figura 2.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "ACF e PACF dati differenziati"
+#| fig-width: 12
+#| fig-height: 4
+
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+Acf(x = diff(y), type = "correlation", na.action = na.pass, lag.max = 60, main = name)
+Acf(x = diff(y), type = "partial",     na.action = na.pass, lag.max = 60, main = name)
+```
+
+\newpage
+
+## Modellazione ARIMA
+
+### Stima del modello:
+
+Il modello ARIMA selezionato è un $ARIMA(1,1,2)\times(0,0,1)_{12} + Drift$, con criteri di informazione pari a AIC=-4457.96 e BIC=-4432.93. Non consideriamo gli effetti di calendario e non sono presenti outliers significativi.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+xreg <- NULL
+fit <- Arima(y = y,
+    order = c(1, 1, 2), seasonal = list(order = c(0, 0, 1), period = 12),
+  xreg = xreg, include.constant = TRUE)
+
+#summary(fit)
+#fit$coef
+
+coefficients_table <- round(rbind(
+  ` `= coef(fit),
+  `s.e.` = sqrt(diag(fit$var.coef))
+),4)
+print(coefficients_table)
+
+fit1=fit
+```
+
+### Diagnostica
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Preparation for the analysis of residuals
+fit <- fit1
+res1   <- residuals(fit)
+resst1 <- scale(res1)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-width: 12
+#| fig-height: 4
+
+par(mar = c(2.5,2.5,2.5,1))
+
+main <- "residui"
+x1 <- res1
+plot(x1, type = "l", main = main, xlab = "", ylab = "")
+#Acf(x = x1, type = "correlation", lag.max = 60, na.action = na.pass, main = main)
+#Acf(x = x1, type = "partial",     lag.max = 60, na.action = na.pass, main = main)
+
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Grafico, ACF e PACF dei residui"
+#| fig-width: 12
+#| fig-height: 4
+
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+
+main <- "residui"
+x1 <- res1
+#plot(x1, type = "l", main = main, xlab = "", ylab = "")
+Acf(x = x1, type = "correlation", lag.max = 60, na.action = na.pass, main = main)
+Acf(x = x1, type = "partial",     lag.max = 60, na.action = na.pass, main = main)
+```
+
+I residui oscillano attorno a zero e non mostrano evidenza di correlazione seriale.
+
+\newpage
+
+**LJUNG-BOX DEI RESIDUI**
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+npar1 <- NROW(fit$coef)                       ## Number of parameters
+fitdf1 <- 0                                   ## If we want to remove np from df
+lag1  <- fitdf1 + c(1, 2, 5, 10, 15, 20)      ## lag
+lb <- mapply(FUN = Box.test, lag = lag1,
+  MoreArgs = list(x = x1, type = "Ljung-Box", fitdf = 0))[1:3, , drop = FALSE]
+rbind(lag = lag1, lb)
+```
+
+Il Ljung-Box dei residui conferma la sostanziale assenza di correlazione seriale.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-width: 12
+#| fig-height: 4
+
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+
+main <- "|residuals|"
+#x1 <- res1^2
+#plot(x1, type = "l", main = main, xlab = "", ylab = "")
+#Acf(x = x1, type = "correlation", lag.max = 60, na.action = na.pass, main = main)
+#ArchTest (x = res1, lags = 12, demean = FALSE) 
+
+x2 <- abs(res1)
+plot(x2, type = "l", main = main, xlab = "", ylab = "")
+Acf(x = x2, type = "correlation", lag.max = 60, na.action = na.pass, main = "|residuals|")
+#ArchTest (x = x2, lags = 12, demean = FALSE) 
+
+```
+
+A seguito del test ARCH l'ipotesi nulla di omoschedasticità viene rifiutata; c'è quindi evidenza di **eteroschedasticità**.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Distribuzione incondizionata dei residui standardizzati: istogramma e Q-Q plot."
+#| fig-width: 7
+#| fig-height: 3
+
+#### Plot
+par(mfrow = c(1,2), mar = c(3,2,2,2))
+hist(x = resst1, breaks = 25, freq = FALSE, main = "residuals", xlab = "", cex.main = 0.8)
+x1 <- seq(from = min(resst1), to = max(resst1)+1, length.out = 100)
+lines(x = x1, y = dnorm(x = x1, mean = 0, sd = 1), col = "red")
+qqnorm(y = resst1, main = "Normal Q-Q Plot", cex.main = 0.8,
+  xlab = "Theoretical Quantiles", ylab = "Sample Quantiles",
+  plot.it = TRUE)
+abline(a = 0, b = 1, col = "red")
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#### Test of normality
+shapiro.test(x = res1)
+```
+
+Il Test di Shapiro-Wilk presenta un p-value significativo indicando che i residui **non seguono una distribuzione normale**.
+
+## Previsioni
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Settings for plots and other
+col.list <- c("blue", "orange")
+model.list <- c("ARIMA", "Naive") 
+```
+
+### Previsioni Ex-post
+
+Controliamo con le previsioni ex-post la bontà predittiva del modello stimato.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Previsioni ex-post"
+#| fig-width: 7
+#| fig-height: 3
+
+par(mar = c(3, 3, 2, 1))
+J <- 12
+H <- 1
+t1 <- .predict.t1(nobs = NROW(y), J = J, n.ahead = H)
+
+#### ARIMA only
+xreg <- NULL
+pred1.1 <- .predict(object = fit1, n.ahead = H, t = t1, y = y, xreg = xreg,
+  fixed.n.ahead = TRUE)
+
+#### Naive
+predn.1 <- .predict.naive(fit = fit1, J = J, n.ahead = H, g = g.transf)
+
+#### 
+x1 <- .pred.bands(pred = pred1.1, alpha = 0.05, g = g.transf)
+
+
+#### Error Measures
+em1 <- .ErrorMeasures(y = yor, fit = x1$mean, naive = predn.1)
+emn <- .ErrorMeasures(y = yor, fit = predn.1, naive = predn.1)
+data.frame(model = model.list, rbind(em1,emn))[, -c(5, 6, 7, 8)]
+
+
+#### Plot
+ind <- x1$t
+time1 <- date[ind]
+ylim <- range(x1$lower, x1$upper,  predn.1)
+plot(x = time1, y = yor[ind], ylim = ylim, xlab = "", ylab = "Index")
+lines(x = time1, y = x1$lower, col = col.list[1], lty = "dotted")
+lines(x = time1, y = x1$upper, col = col.list[1], lty = "dotted")
+lines(x = time1, y = x1$mean, col = col.list[1])
+lines(x = time1, y = predn.1, col = col.list[2])
+
+
+legend(x = "topleft", fill = NULL, legend = model.list, 
+  col = col.list, lty = 1, border = FALSE, text.col = col.list)
+```
+
+L'orizzonte $h$ è fissato a 1, l'origine $t$ è Gennaio 2024 e "scorre" per i successivi 12 mesi.
+
+Confrontando le misure di errore di previsione dei modelli ARIMA e NAIVE emerge che l'ARIMA presenta valori decisamente migliori.
+
+### Ex-ante
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Previsioni ex-ante"
+#| fig-width: 7
+#| fig-height: 3
+
+par(mar = c(3, 3, 2, 1))
+
+H <- 12            ## horizon
+t1 <- NROW(y)      ## origin
+
+#### ARIMA only
+pred1 <- .predict(object = fit1, n.ahead = H, t = t1, y = y, xreg = NULL, 
+  fixed.n.ahead = FALSE)
+
+#### Naive
+predn <- .predict.naive(fit = fit1, J = 0, n.ahead = H, g = g.transf)
+
+#### 
+x1 <- .pred.bands(pred = pred1, alpha = 0.05, g = g.transf)
+
+#### Plot
+ylim <- range(x1$lower, x1$upper,  predn)
+plot(x = time1, y = x1$mean, type = "l", col = col.list[1], 
+  ylim = ylim, xlab = "", ylab = "Index")
+lines(x = time1, y = predn, col = col.list[2])
+lines(x = time1, y = x1$lower, col = col.list[1], lty = "dotted")
+lines(x = time1, y = x1$upper, col = col.list[1], lty = "dotted")
+par(mfrow = c(1,1), mar = c(2, 4, 2, 0.5))
+legend(x = "topleft", fill = NULL, legend = model.list, 
+  col = col.list, lty = 1, border = FALSE, text.col = col.list)
+```
+
+L'origine $T$ è Gennaio 2025 e l'orizzonte va da 1 a 12 mesi. La figura 6 mostra che con lo scorrere del tempo le previsioni effettutate dai due modelli sono sempre più distanti e le bande di pevisione si allargano.
+
+\newpage
+
+# Amazon (AMZN)
+
+```{r}
+#| eval: false
+#| echo: false
+#| output: false
+
+##### Get data from Yahoo-Finance
+
+#### Symbol
+symbol <- "AMZN"
+
+### Get data
+#Output: Un oggetto di classe xts che contiene i dati storici del titolo
+data <- getSymbols(Symbols = symbol, src = "yahoo", auto.assign = FALSE,
+  from = "2016-01-01")
+
+#### Adjust to a data.frame
+colnames(data) <- gsub(x = colnames(data), pattern = paste0(symbol, "."),
+  replacement = "")
+data <- data.frame(Date = index(data), data, check.names = FALSE)
+
+### Write
+file <- file.path("C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/PROGETTO",
+  paste0(symbol, ".csv"))
+
+write.table(x = data, file = file, quote = FALSE, sep = "\t", na = ".",
+  row.names = FALSE, col.names = TRUE)
+
+
+head(data, 3)
+tail(data, 3)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+
+#####Read data
+#### Data
+file.data <- "C:/Users/Utente/Desktop/UNIVERSITA'/a.a. 2024-2025/I semestre/STATISTICA ECONOMICA/PROGETTO/AMZN.csv"
+
+#Carica i dati da un file delimitato
+data <- read.table(file = file.data, header = TRUE, sep = "\t", 
+  check.names = FALSE, comment.char = "", na.strings = ".")
+
+#### Time
+data$Date <- as.Date(x = data$Date)
+
+#### Extract period
+ind <- as.Date(x = "2016-01-01") <= data$Date
+
+data <- data[ind, , drop = FALSE] 
+
+#### Add variables
+data <- data.frame(data,
+  cc.ret = c(NA, diff(log(data$Adjusted))),
+  gkVol = .garmanklass(data = data, sd = TRUE),
+  check.names = TRUE)
+data <- data[-1, , drop = FALSE] ## Remove the row with NA
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#####Split data: in- vs out-of-sample
+data.tot <- data
+ind <- data.tot$Date <= as.Date(x = "2023-12-31")
+data <- data.tot[ind, , drop = FALSE]
+data.out <- data.tot[!ind, , drop = FALSE]
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#####Extract variables
+#### In-sample
+time  <- data$Date
+yc    <- data$Close
+yclog <- log(yc)
+y     <- data$Adjusted
+ylog  <- log(y)
+nobs <- NROW(y)
+```
+
+## Introduzione
+
+Amazon **AMZN** è un'azienda multinazionale di commercio elettronico con sede principale a Seattle nello Stato di Washington. Dal punto di vista finanziario rappresenta uno dei benchmark del settore tecnologico e un punto di riferimento per investitori e analisti. L’obiettivo è modellare la dinamica di AMZN basandoci sui prezzi dal 2016-01-05 al 2025-01-16 al fine di prevederne la volatilità dal 2025-01-17 al 2025-01-26 .
+
+## Analisi preliminare
+
+### Analisi dei prezzi
+
+La figura 7 riporta l'evoluzione del prezzo di chiusura aggiustato del titolo **Amazon** nel tempo, sia in scala lineare che logaritmica
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Time series plots dei prezzi e log-prezzi."
+#| fig-width: 8
+#| fig-height: 3
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+
+plot(x = time, y = y,     main = "AdjClose",     xlab = " ", ylab = "", type = "l")
+plot(x = time, y = ylog,  main = "Ln(AdjClose)", xlab = " ", ylab = "", type = "l")
+```
+
+La figura 7 mostra una crescita significativa dal 2016, con un aumento marcato fino al 2021, coincidente con il periodo della pandemia da Covid. Ciò è dovuto all'aumento di utenti che per necessità scelgono di comprare online. Il periodo successivo è caratterizzato da una fase di maggiore volatilità.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "ACF e PACF dei prezzi."
+#| fig-width: 12
+#| fig-height: 4
+
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+
+Acf(x = y, lag.max = 75, type = "correlation", main = "Price")
+Acf(x = y, lag.max = 75, type = "partial", main = "Price")
+```
+
+La combinazione di **ACF con decrescita lineare** e **PACF con un solo picco significativo** (figura 8) è indicativa di una serie con radice unitaria.
+
+### Analisi dei rendimenti
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "Log-rendimenti e ACF dei log-rendimenti."
+#| fig-width: 12
+#| fig-height: 4
+
+par(mfrow = c(1,2), mar = c(2.5,4,4,1))
+
+#### Percentage log-returns
+yret <- xts(x = 100 * data$cc.ret, order.by = time)
+
+plot(x = time, y = yret, main = "log-rendimenti", 
+  xlab = "", ylab = "", type = "l")
+abline(h = mean(data$cc.ret, na.rm = TRUE), col = "red")
+
+Acf(x = yret, lag.max = 75, type = "correlation", main = "ACF dei log-rendimenti")
+```
+
+I log-rendimenti in figura 9 oscillano attorno alla media (linea rossa), con una volatilità relativamente più elevata nel periodo successivo alla pandemia COVID-19.
+
+La maggior parte delle autocorrelazioni rimange entro la regione di accettazione segnalando **scarsa correlazione seriale**. Ciò è confermato anche dai risultati del Test di Pormanteau, con statistica test di **Ljung Box**.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+npar <- 0
+lag <- c(2, 5, 10, 15, 20, 30, 50) + npar
+lb <- mapply(FUN = Box.test, lag = lag, 
+  MoreArgs = list(x = yret, type = "Ljung-Box", fitdf = npar))[1:3,]
+rbind(lag = lag, lb) # Combina i valori di lag e i risultati del test (Qk, gradi di libertà e p-value) in una matrice leggibile.
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+#| fig-cap: "ACF of log-returns and some transformations."
+#| fig-width: 7
+#| fig-height: 9
+par(mfrow = c(3,1))
+
+#Calcola e visualizza l'Autocorrelation Function (ACF) per i rendimenti logaritmici (yret)
+Acf(x = yret, lag.max = 75, type = "correlation", main = "Returns")
+
+#Calcola l'ACF dei valori assoluti dei rendimenti (∣yret∣)
+Acf(x = abs(yret), lag.max = 75, type = "correlation", main = "|Returns|")
+
+#Calcola l'ACF dei quadrati dei rendimenti (yret^2)
+Acf(x = yret^2, lag.max = 75, type = "correlation", main = expression(Returns^2))
+```
+
+\newpage
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+lag <- c(4, 8, 12, 16)
+
+#Primo Test ARCH sui rendimenti
+at <- mapply(FUN = ArchTest, lags = lag, 
+  MoreArgs = list(x = yret, demean = TRUE))
+print(rbind(lag = lag, at[1:3,]))
+
+#Secondo Test ARCH sui valori assoluti dei rendimenti
+at <- mapply(FUN = ArchTest, lags = lag, 
+  MoreArgs = list(x = sqrt(abs(yret)), demean = TRUE))
+print(rbind(lag = lag, at[1:3,]))
+```
+
+I risultati dei test ARCH, sui rendimenti logaritmici e sui valori assoluti, mostrano p-values\<0.01, indicando **eteroschedasticità**. Questo comportamento è coerente con il "volatility clustering", tipico delle serie finanziarie.
+
+## Modellazione ARCH/GARCH
+
+### Constant + simple-GARCH(1,1)
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Specification
+spec1 <- ugarchspec(
+  mean.model = list(armaOrder = c(0,0), include.mean = TRUE,
+    external.regressors = NULL),
+  variance.model = list(model = "sGARCH", garchOrder = c(1,1), 
+    submodel = NULL, external.regressors = NULL, variance.targeting = FALSE),
+  distribution.model = "std")
+
+#### Estimation
+fit <- ugarchfit(spec = spec1, data = yret)
+
+#### Copy
+fit1 <- fit
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#### Information criteria
+infocriteria(fit)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Estimated coefficients
+fit@fit$robust.matcoef
+
+#### Standardized residuals
+zres <- fit@fit$z
+```
+
+Criteri: Akaike 3.987109, Bayes 4.001049
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+##Test di stabilità (Test di Nyblom)
+nyblom(fit1)
+```
+
+Dal test di Nyblom emerge che l'ipotesi di stabilità dei parametri è rigettata.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+###Sign test
+signbias(fit)
+```
+
+Il Sign test restituisce p-values maggiori di 0.05, indicando che il modello s-GARCH(1,1) **non presenta effetti di asimmetria** significativi nella risposta agli shock positivi o negativi.
+
+Poiché però il test è poco potente si prosegue con GJR-GARCH(1,1).
+
+\newpage
+
+### Constant + GJR-GARCH(1,1)
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Specification
+spec2 <- ugarchspec(
+  mean.model = list(armaOrder = c(0,0), include.mean = TRUE,
+    external.regressors = NULL),
+  variance.model = list(model = "gjrGARCH", garchOrder = c(1,1), 
+    submodel = NULL, external.regressors = NULL, variance.targeting = FALSE),
+  distribution.model = "std")
+
+#### Estimation
+fit <- ugarchfit(spec = spec2, data = yret)
+
+#### Copy
+fit2 <- fit
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#### Information criteria
+infocriteria(fit)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Estimated coefficients
+fit@fit$robust.matcoef
+
+#### Standardized residuals
+zres <- fit@fit$z
+```
+
+Criteri: Akaike 3.980546, Bayes 3.997273
+
+Il parametro $\gamma_1$ è significativo.
+
+```{r}
+#| eval: false
+#| echo: false
+#| output: true
+
+###Test di stabilità (Test di Nyblom)
+nyblom(fit)
+```
+
+La statistica congiunta del test di Nyblom suggerisce che l'ipotesi di stabilità dei parametri è rigettata.
+
+```{r}
+#| eval: false
+#| echo: false
+#| output: true
+
+###Sign test
+signbias(fit)
+```
+
+Il Sign test non è significativo.
+
+### Constant + T-GARCH(1,1)
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+#### Specification
+spec3 <- ugarchspec(
+  mean.model = list(armaOrder = c(0,0), include.mean = TRUE,
+    external.regressors = NULL),
+  variance.model = list(model = "fGARCH", garchOrder = c(1,1), 
+    submodel = "TGARCH", external.regressors = NULL, variance.targeting = FALSE),
+  distribution.model = "std")
+
+## Include the line below to estimate a TGARCH without asymmetric effect
+# fixed.pars = list(eta11 = 0))
+
+#### Estimation
+fit <- ugarchfit(spec = spec3, data = yret)
+
+#### Copy
+fit3 <- fit
+fit3c <- .fgarch.2.gjr(fit = fit)
+
+#### Information criteria 
+infocriteria(fit3)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Estimated coefficients 
+fit3c$robust.matcoef
+
+#### Standardized residuals 
+zres <- fit@fit$z
+```
+
+Criteri: Akaike 3.968460, Bayes 3.985187
+
+La significatività del parametro $\gamma_1$ conferma che l'effetto leverage è rilevante nei dati analizzati.
+
+```{r}
+#| eval: false
+#| echo: false
+#| output: true
+
+###Test di stabilità (Test di Nyblom)
+nyblom(fit)
+```
+
+```{r}
+#| eval: false
+#| echo: false
+#| output: true
+
+###Sign test
+signbias(fit)
+```
+
+La statistica congiunta del test di Nyblom suggerisce che l'ipotesi di stabilità dei parametri è rigettata.
+
+Il Sign test non è significativo.
+
+### **News Impact Curve (NIC)**
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| fig-cap: "NIC s-GARCH, GJR-GARCH e T-GARCH"
+#| fig-width: 8
+#| fig-height: 5
+
+par(mar = c(2.5,4,4,1))
+
+
+ni1 <- newsimpact(z = NULL, fit1)
+ni2 <- newsimpact(z = NULL, fit2)
+ni3 <- newsimpact(z = NULL, fit3)
+
+legend <- c("Simple-GARCH", "GJR-GARCH", "T-GARCH")
+col  <- c("black", "red", "blue")
+ylim <- range( ni1$zy, ni2$zy , ni3$zy)
+par(mfrow = c(1,1), mar = c(4, 4.5, 3, 1) + 0.1, lwd = 2)
+plot(x = ni1$zx, y = ni1$zy, ylab = ni1$yexpr, xlab = expression(u[t - 1]), 
+  type = "l", ylim = ylim, main = "News Impact Curve", col = col[1])
+lines(x = ni2$zx, y = ni2$zy, col = col[2], lwd = 2)
+lines(x = ni3$zx, y = ni3$zy, col = col[3], lwd = 2)
+legend(x = "topright", y = NULL, legend = legend, border = FALSE, col = col, 
+  lty = 1, text.col = col)
+```
+
+La NIC per il s-GARCH è **simmetrica** rispetto a $u_{t-1}=0$.
+
+La NIC per il GJR-GARCH è **asimmetrica**, con una pendenza più accentuata per $u_{t-1}<0$. Gli shock negativi hanno un impatto maggiore sulla volatilità rispetto a quelli positivi.
+
+Anche il modello T-GARCH mostra **asimmetria**, ma in modo meno accentuato.
+
+### Constant + IGARCH(1,1)
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#### Specification
+spec4 <- ugarchspec(
+  mean.model = list(armaOrder = c(0,0), include.mean = TRUE,
+    external.regressors = NULL),
+  variance.model = list(model = "iGARCH", garchOrder = c(1,1), 
+    submodel = NULL, external.regressors = NULL, variance.targeting = FALSE),
+  distribution.model = "std")
+
+#### Estimation
+fit <- ugarchfit(spec = spec4, data = yret)
+
+#### Copy
+fit4 <- fit
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#### Information criteria
+#infocriteria(fit4)
+#### Estimated coefficients
+fit@fit$robust.matcoef
+#### Standardized residuals
+zres <- fit@fit$z
+```
+
+Criteri: Akaike 3.986430, Bayes 3.99758
+
+## Previsioni Ex-Post
+
+Si procede confrontando le stime della volatilità generate dal modello con la volatilità di Garman-Klass (**benchmark esterno**, misura di volatilità ricavabile dai dati giornalieri).
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+yret.tot <- xts(x = data.tot$cc.ret * 100, order.by = data.tot$Date)
+y.tot <- data.tot$gkVol * 100
+nobs.tot <- NROW(y.tot)
+y <- data$gkVol * 100
+y.out <- data.out$gkVol * 100
+nobs.out <- NROW(y.out)
+```
+
+### Volatilità di Garman-Klass vs valori stimati
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| label: fig-GKvsFit
+#| fig-cap: "Volatilità di Garman-Klass vs valori stimati."
+#| fig-width: 8
+#| fig-height: 5
+
+par(mar = c(2.5,4,0,4))
+
+legend <- c("GK volatility", "s-GARCH", "GJR-GARCH", "T-GARCH", "I-GARCH")
+col  <- c("black", "red", "blue", "green", "purple")
+
+#Disegna la serie temporale della volatilità Garman-Klass in nero.
+plot(x = time, y = y, type = "l", col = col[1], ylab = "Volatilità di Garman-Klass")
+lines(x = time, y = fit1@fit$sigma, col = col[2])  ## s-GARCH
+lines(x = time, y = fit2@fit$sigma, col = col[3])  ## GJR-GARCH
+lines(x = time, y = fit3@fit$sigma, col = col[4])   ## T-GARCH
+lines(x = time, y = fit4@fit$sigma, col = col[5])   ## I-GARCH
+legend(x = "topright", y = NULL, legend = legend, border = FALSE, col = col, 
+  lty = 1, text.col = col)
+```
+
+In figura 11 le stime di tutti i modelli seguono bene il profilo della volatilità di Garman-Klass.
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+####
+H <- 1
+#### Set for the functions below
+n.ahead <- H                     ## The usual h
+out.sample <- nobs.out - 1 + H   ## Corresponding to J
+n.roll <- nobs.out - 1           ## How many forecasts to do in addition to 1st
+
+#### sGARCH 
+fit <- fit1
+specx <- getspec(fit)
+setfixed(specx) <- as.list(coef(fit))
+forc <- ugarchforecast(fitORspec = specx, n.ahead = n.ahead,  
+  data = yret.tot, out.sample = out.sample, n.roll = n.roll)
+## Examine forc@forecast
+forc@forecast$sigmaFor
+forc1 <- forc@forecast$sigmaFor[H,]
+
+#### gjrGARCH
+fit <- fit2
+specx <- getspec(fit)
+setfixed(specx) <- as.list(coef(fit))
+forc <- ugarchforecast(fitORspec = specx, n.ahead = n.ahead,  
+  data = yret.tot, out.sample = out.sample, n.roll = n.roll)
+forc2 <- forc@forecast$sigmaFor[H,]
+
+#### TGARCH
+fit <- fit3
+specx <- getspec(fit)
+setfixed(specx) <- as.list(coef(fit))
+forc <- ugarchforecast(fitORspec = specx, n.ahead = n.ahead,  
+  data = yret.tot, out.sample = out.sample, n.roll = n.roll)
+forc3 <- forc@forecast$sigmaFor[H,]
+
+
+#### IGARCH
+fit <- fit4
+specx <- getspec(fit)
+setfixed(specx) <- as.list(coef(fit))[-4]
+forc <- ugarchforecast(fitORspec = specx, n.ahead = n.ahead,  
+  data = yret.tot, out.sample = out.sample, n.roll = n.roll)
+forc4 <- forc@forecast$sigmaFor[H,]
+```
+
+### Diagnostica di Mincer-Zarnowitz
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+#Combina i risultati dei test Mincer-Zarnowitz per tutti i modelli (s-GARCH, GJR-GARCH, T-GARCH,) in un unico data frame
+MincerZarnowitz <- rbind(
+  data.frame(model = "s-GARCH", .MincerZarnowitz.local(y = y.out, fit = forc1)),
+  data.frame(model = "GJR-GARCH", .MincerZarnowitz.local(y = y.out, fit = forc2)),
+  data.frame(model = "T-GARCH", .MincerZarnowitz.local(y = y.out, fit = forc3)),
+  data.frame(model = "I-GARCH", .MincerZarnowitz.local(y = y.out, fit = forc4)))
+
+print(MincerZarnowitz, row.names = FALSE)
+
+```
+
+Non si rifiutano le ipotesi nulle sui parametri $H_0:\beta_0=0$ e $H_0:\beta_1=0$ solo per il T-GARCH. Anche la statistica F relativa al test congiunto $H_0:\beta_0=\beta_1=0$ risulta significativa per s-GARCH, GJR-GARCH e I-GARCH, ma non per T-GARCH. Quest'ultimo tende quindi a fornire previsioni non distorte.
+
+### Misure di errore di previsione
+
+\small
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+
+#### Set naive
+naive.vol <- sd(yret) 
+naive.var <- naive.vol^2 
+
+#Crea un data frame contenente le misure di errore previsionali per ciascun modello e per il benchmark naive.
+ErrorMeas <- data.frame(
+  measure = c("Volatility", "Volatility", "Volatility", "Volatility", "Volatility"), 
+  model = c("s-GARCH", "GJR-GARCH", "T-GARCH", "I-GARCH", "naive"), 
+  rbind( 
+    .ErrorMeasures(y = y.out,   fit = forc1,   naive = naive.vol), 
+    .ErrorMeasures(y = y.out,   fit = forc2,   naive = naive.vol), 
+    .ErrorMeasures(y = y.out,   fit = forc3,   naive = naive.vol), 
+    .ErrorMeasures(y = y.out,   fit = forc4,   naive = naive.vol), 
+    .ErrorMeasures(y = y.out,   fit = rep(naive.vol, nobs.out),  naive = naive.vol)))
+print(ErrorMeas, row.names = FALSE)
+```
+
+\normalsize
+
+Il T-GARCH risulta essere il modello migliore in termini di precisione previsionale sulla volatilità, presentando i valori più bassi per ogni misura di errore.
+
+### Test di Diebold-Mariano
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+## Volatility
+h <- 1
+
+#Crea un data frame per confrontare le previsioni di volatilità o varianza tra i modelli
+DieboldMariano <- data.frame(
+  measure = c(
+    "Volatility", "Volatility", "Volatility", 
+    "Volatility", "Volatility", "Volatility",
+    "Volatility", "Volatility", "Volatility",
+    "Variance", "Variance", "Variance",
+    "Variance", "Variance", "Variance",
+    "Variance", "Variance", "Variance"),
+  model = c(
+    "T-GARCH - s-GARCH", "T-GARCH - s-GARCH", "T-GARCH - s-GARCH", 
+    "T-GARCH - GJR-GARCH", "T-GARCH - GJR-GARCH", "T-GARCH - GJR-GARCH",
+    "T-GARCH - I-GARCH", "T-GARCH - I-GARCH", "T-GARCH - I-GARCH",
+    "T-GARCH - s-GARCH", "T-GARCH - s-GARCH", "T-GARCH - s-GARCH", 
+    "T-GARCH - GJR-GARCH", "T-GARCH - GJR-GARCH", "T-GARCH - GJR-GARCH",
+    "T-GARCH - I-GARCH", "T-GARCH - I-GARCH", "T-GARCH - I-GARCH"), 
+  rbind( 
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc1, h = h, loss = "SE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc1, h = h, loss = "AE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc1, h = h, loss = "LLE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc2, h = h, loss = "SE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc2, h = h, loss = "AE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc2, h = h, loss = "LLE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc4, h = h, loss = "SE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc4, h = h, loss = "AE"),
+   .DieboldMariano.local(y = y.out, f1 = forc3, f2 = forc4, h = h, loss = "LLE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc1^2, h = h, loss = "SE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc1^2, h = h, loss = "AE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc1^2, h = h, loss = "LLE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc2^2, h = h, loss = "SE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc2^2, h = h, loss = "AE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc2^2, h = h, loss = "LLE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc4^2, h = h, loss = "SE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc4^2, h = h, loss = "AE"),
+   .DieboldMariano.local(y = y.out^2, f1 = forc3^2, f2 = forc4^2, h = h, loss = "LLE")))
+
+#print(DieboldMariano, row.names = FALSE)
+DieboldMariano$p_value <- 2 * (1 - pnorm(abs(DieboldMariano$statistic)))
+print(DieboldMariano, row.names = FALSE)
+```
+
+Il test risulta sempre significativo, indicando che il modello T-GARCH produce previsioni significativamente migliori di tutti gli altri modelli considerati.
+
+Per minimizzare gli errori nella previsione della volatilità o della varianza, T-GARCH è la scelta più robusta tra i modelli considerati.
+
+## Previsioni Ex-Ante
+
+Usiamo il modello T-GARCH per le previsioni ex-ante, con origine $T$ il 17/01/25 e con orizzonte della previsione da 1 a 10 (dal 17/01/25 al 26/01/25).
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+
+###Riadattare il miglior modello dell'intera serie temporale
+
+#Estrae la specifica del modello TGARCH (fit3) già stimato in precedenza.
+#Questa specifica include tutti i dettagli del modello come:
+  #-Parametri stimati.
+  #-Struttura del modello (es. ordini GARCH).
+specx <- getspec(object = fit3)
+
+#Esegue una nuova stima del modello TGARCH (fit3) sull'intero dataset (yret.tot), includendo sia i dati in-sample che quelli out-of-sample.
+#Questo step è essenziale per produrre previsioni ex-ante, poiché utilizza tutte le informazioni disponibili per fornire stime ottimali.
+fit <- ugarchfit(spec = specx, data = yret.tot)
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: false
+
+###Calcolare le previsioni
+
+### Settings
+H <- 10
+
+####  ex-ante, h = 1:H
+forc <- ugarchforecast(fitORspec = fit, n.ahead = H, 
+  data = NULL, out.sample = 0, n.roll = 0)
+forc@forecast
+```
+
+```{r}
+#| eval: true
+#| echo: false
+#| output: true
+#| label: fig-ForecastPlot
+#| fig-cap: "Previsioni ex-ante T-GARCH."
+#| fig-width: 7
+#| fig-height: 8
+
+par(mfrow = c(2,1))
+#Plotta le previsioni della media condizionale (μ_t) per il periodo di previsione.
+plot(forc, which = 1)
+#Plotta le previsioni della volatilità condizionale (𝜎) per il periodo di previsione. La volatilità condizionale rappresenta l'incertezza stimata del modello per ciascun punto futuro.
+plot(forc, which = 3)
+```
+
+Il modello prevede una media che si avvicina a 0, coerente con l'ipotesi che i rendimenti siano stazionari attorno alla media.
+
+Le bande di confidenza catturano una certa variabilità nei futuri rendimenti.
+
+Per quanto riguarda le previsioni per la volatilità il modello T-GARCH prevede che all'aumentare di $h$ si avvicini all'unconditional volatility.
